@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+
+import os
+import sys
+"""
+To "install" the check-authorship hook, you first need a pre-commit hook in
+your collection of git hooks. (If you don't have one, try enabling the default
+sample pre-commit hook that ships with git.)
+
+Once you have a pre-commit hook, enable check-authorship by placing it
+side-by-side in the directory with pre-commit, and add these lines to your
+pre-commit hook:
+
+THISDIR=`dirname $0`
+${THISDIR}/check-authorship
+if [ $? != 0 ]; then
+    echo "check-authorship failed"
+    exit 1
+fi
+"""
+
+# Each time you clone a repo, the first commit will fail (by design).
+# That will trigger you to come populate your whitelist:
+_whitelist_ = (('whitelistname', 'name@whitelist.mail'), )
+
+git_author = os.getenv('GIT_AUTHOR_NAME', '')
+git_author_email = os.getenv('GIT_AUTHOR_EMAIL', '')
+
+# At time of writing, this script does not SANITY-CHECK the committer info to
+# decide whether to pass or fail. We just print this info as a courtesy.
+git_committer = os.getenv('GIT_COMMITTER_NAME', '')
+git_committer_email = os.getenv('GIT_COMMITTER_EMAIL', '')
+
+print('--------------------------------------------------')
+print('In check-authorship hook:')
+print('  author: {}'.format(git_author))
+print('  author email: {}'.format(git_author_email))
+print('  committer: {}'.format(git_committer))
+print('  committer email: {}'.format(git_committer_email))
+print()
+
+
+def exit_this_hook(all_is_well, extra_message):
+    print('{} {}'.format('check-authorship done.', extra_message))
+    print('(You may wish to update your whitelist in: {})'.format(
+        os.path.abspath(__file__)))
+    print('--------------------------------------------------')
+    if all_is_well:
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+
+def main():
+    for good_tuple in _whitelist_:
+        name_ok = git_author == good_tuple[0]
+        email_ok = git_author_email == good_tuple[1]
+        if name_ok and email_ok:
+            # Happy exit!
+            exit_this_hook(
+                all_is_well=True,
+                extra_message='allowing: "{}"'.format(good_tuple[1]))
+
+    # Sad exit!
+    # (No good matches found for $GIT_AUTHOR_EMAIL in whitelist)
+    exit_this_hook(
+        all_is_well=False,
+        extra_message='"{}" not found in whitelist.'.format(git_author_email))
+
+
+if __name__ == "__main__":
+    main()

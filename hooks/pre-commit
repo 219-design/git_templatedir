@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if git-rev-parse --verify HEAD >/dev/null 2>&1
+then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# DNC stands for 'do not commit'
+MARKER_STRING_TO_PREVENT_A_COMMIT="DNC DNC DNC"
+
+COUNT_BAD_DISALLOWED_LINES=`git diff --cached $against | grep "${MARKER_STRING_TO_PREVENT_A_COMMIT}" | wc -l`
+
+if [ "$COUNT_BAD_DISALLOWED_LINES" -eq "0" ]
+then
+    # don't do anything. we are happy so far.
+    true
+else
+    echo "custom pre-commit script is BLOCKING this commit!  You have \"$MARKER_STRING_TO_PREVENT_A_COMMIT\" (do not commit) in your source file!"
+    exit 1
+fi
+
+THISDIR=`dirname $0`  # instead of PWD, let us find where this present file is located
+${THISDIR}/check-authorship
+if [ $? != 0 ]; then
+    echo "check-authorship failed"
+    exit 1
+fi

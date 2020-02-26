@@ -1,0 +1,52 @@
+#!/bin/bash
+
+echo "CUSTOM Pre-Push Script Running"
+
+# because i don't know bash fu for arrays and array-membership checking (lol... sigh...)
+protected_branch_a='refs/heads/master'
+protected_branch_b='refs/heads/production'
+protected_branch_c='refs/heads/cccccc' # <-- populate with something meaninful as needed
+protected_branch_d='refs/heads/dddddd'
+protected_branch_e='refs/heads/eeeeee'
+protected_branch_f='refs/heads/ffffff'
+protected_branch_g='refs/heads/gggggg'
+
+any_commits=0
+
+while read local_ref local_sha remote_ref remote_sha
+do
+    any_commits=1
+
+    echo "  ... $local_sha"
+
+    # because i don't know bash for arrays and array-membership checking
+    if [[ $protected_branch_a = $remote_ref
+          || $protected_branch_b = $remote_ref
+          || $protected_branch_c = $remote_ref
+          || $protected_branch_d = $remote_ref
+          || $protected_branch_e = $remote_ref
+          || $protected_branch_f = $remote_ref
+          || $protected_branch_g = $remote_ref ]]
+    then
+
+        read -p "You're about to push >>> $remote_ref <<<, is that what you intended? [y|n] " -n 1 -r < /dev/tty
+        echo
+        if echo $REPLY | grep -E '^[Yy]$' > /dev/null
+        then
+            echo "Ok.  Pre-Push Script Obeying!"
+            exit 0 # push will execute
+        fi
+
+        echo "Blocking the push!!"
+        exit 1 # push will not execute
+
+    fi # <--- end block for protected branch
+
+done
+
+if [ "$any_commits" = "0" ]
+then
+    echo "CUSTOM Pre-Push Script Done.     (ZERO content to check)."
+else
+    echo "CUSTOM Pre-Push Script Done (nothing was flagged)."
+fi
