@@ -5,8 +5,8 @@ echo "CUSTOM Pre-Push Script Running"
 # because i don't know bash fu for arrays and array-membership checking (lol... sigh...)
 protected_branch_a='refs/heads/master'
 protected_branch_b='refs/heads/production'
-protected_branch_c='refs/heads/cccccc' # <-- populate with something meaninful as needed
-protected_branch_d='refs/heads/dddddd'
+protected_branch_c='refs/heads/main'
+protected_branch_d='refs/heads/dddddd' # <-- populate with something meaninful as needed
 protected_branch_e='refs/heads/eeeeee'
 protected_branch_f='refs/heads/ffffff'
 protected_branch_g='refs/heads/gggggg'
