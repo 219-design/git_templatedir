@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if git-rev-parse --verify HEAD >/dev/null 2>&1
+if git rev-parse --verify HEAD >/dev/null 2>&1
 then
     against=HEAD
 else
@@ -23,7 +23,7 @@ else
 fi
 
 THISDIR=`dirname $0`  # instead of PWD, let us find where this present file is located
-${THISDIR}/check-authorship
+python ${THISDIR}/check-authorship
 if [ $? != 0 ]; then
     echo "check-authorship failed"
     exit 1
