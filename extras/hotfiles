@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+IFS=$'\n\t'
+
+thelimit=30
+theoldestdate=$(date +%Y-%m-%d -d'1 year ago')
+
+if [[ -n ${LIMIT-} ]]; then
+  thelimit="$LIMIT"
+fi
+if [[ -n ${OLDDATE-} ]]; then
+  theoldestdate="$OLDDATE"
+fi
+
+echo "Hottest $thelimit (LIMIT) files since $theoldestdate (OLDDATE):"
+echo ""
+
+git log \
+    --after="$theoldestdate" \
+    --pretty=format: --name-only \
+  | grep "^$(git rev-parse --show-prefix)" \
+  | sort \
+  | uniq -c \
+  | sort -rg \
+  | head -n "$thelimit"
